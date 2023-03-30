@@ -5,19 +5,23 @@
   <div class="dashboard-div">
     <TableComponent :data="data" />
   </div>
-  <button class="button" @click="proceedItem">{{ PROCEED }}</button>
+  <button class="button" type="button" @click="proceedItem">{{ PROCEED }}</button>
+
 </template>
 
 <script>
-import TableComponent from "@/components/TableComponent.vue";
-import AlertComponent from "@/components/AlertComponent.vue";
-import store from "../Store/Store";
-import router from "@/router";
-import { mapState } from "vuex";
-import { SYMBOLS, MESSAGES, BUTTONS } from "../Commons/Constants";
+/* eslint-disable */
+import { ref } from 'vue';
+import { mapState } from 'vuex';
+import TableComponent from '../components/TableComponent.vue';
+import AlertComponent from '../components/AlertComponent.vue';
+import store from '../Store/Store';
+import router from '@/router'; // eslint-disable-line
+import { SYMBOLS, MESSAGES, BUTTONS, URL } from '../Commons/Constants.ts'
+
 export default {
   components: { TableComponent, AlertComponent },
-  name: "DashBoard",
+  name: 'DashBoard',
   data() {
     return {
       symbols: SYMBOLS,
@@ -25,53 +29,52 @@ export default {
       showAlert: false,
       message: MESSAGES.NO_RESPONSE,
       PROCEED: BUTTONS.PROCEED,
+      onLoadScriptRef: ref(this.createWidget),
+      FETCH_URL:URL.FETCH_URL,
+      APIKEY:URL.APIKEY
     };
+  },
+    mounted() {
+     setInterval(() => {
+      this.fetchMarketData();
+    }, 5000);
   },
   methods: {
     fetchMarketData() {
       this.symbols.forEach((symbol) => {
-        fetch(
-          `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=SRKKABS9IFFCA6WG`
-        )
+        fetch(`${this.FETCH_URL}${symbol}${this.APIKEY}`)
           .then((response) => response.json())
           .then((dataresponse) => {
             if (dataresponse) {
-              const globalQuote = dataresponse["Global Quote"];
-              const index = this.data.findIndex(
-                (item) => item.symbol === globalQuote["01. symbol"]
-              );
+              const globalQuote = dataresponse['Global Quote'];
+              const index = this.data.findIndex((item) => item.symbol === globalQuote['01. symbol']);
               if (index >= 0) {
                 this.data[index] = {
-                  symbol: globalQuote["01. symbol"],
-                  open: parseFloat(globalQuote["02. open"]).toFixed(2),
-                  high: parseFloat(globalQuote["03. high"]).toFixed(2),
-                  low: parseFloat(globalQuote["04. low"]).toFixed(2),
-                  price: parseFloat(globalQuote["05. price"]).toFixed(2),
-                  volume: globalQuote["06. volume"],
-                  latestTradingDay: globalQuote["07. latest trading day"],
-                  previousClose: parseFloat(
-                    globalQuote["08. previous close"]
-                  ).toFixed(2),
-                  change: parseFloat(globalQuote["09. change"]).toFixed(2),
-                  changePercent: globalQuote["10. change percent"],
-                };
-              } else {
-                this.data.push({
-                  symbol: globalQuote["01. symbol"],
-                  open: parseFloat(globalQuote["02. open"]).toFixed(2),
-                  high: parseFloat(globalQuote["03. high"]).toFixed(2),
-                  low: parseFloat(globalQuote["04. low"]).toFixed(2),
-                  price: parseFloat(globalQuote["05. price"]).toFixed(2),
-                  volume: globalQuote["06. volume"],
-                  latestTradingDay: globalQuote["07. latest trading day"],
-                  previousClose: parseFloat(
-                    globalQuote["08. previous close"]
-                  ).toFixed(2),
-                  change: parseFloat(globalQuote["09. change"]).toFixed(2),
-                  changePercent: globalQuote["10. change percent"],
+                  symbol: globalQuote['01. symbol'],
+                  open: parseFloat(globalQuote['02. open']).toFixed(2),
+                  high: parseFloat(globalQuote['03. high']).toFixed(2),
+                  low: parseFloat(globalQuote['04. low']).toFixed(2),
+                  price: parseFloat(globalQuote['05. price']).toFixed(2),
+                  volume: globalQuote['06. volume'],
+                  latestTradingDay: globalQuote['07. latest trading day'],
+                  previousClose: parseFloat(globalQuote['08. previous close']).toFixed(2),
+                  change: parseFloat(globalQuote['09. change']).toFixed(2),
+                  changePercent: globalQuote['10. change percent'],
+                };}  // eslint-disable-line
+              else  // eslint-disable-line
+              {this.data.push({symbol: globalQuote['01. symbol'], // eslint-disable-line
+                  open: parseFloat(globalQuote['02. open']).toFixed(2),
+                  high: parseFloat(globalQuote['03. high']).toFixed(2),
+                  low: parseFloat(globalQuote['04. low']).toFixed(2),
+                  price: parseFloat(globalQuote['05. price']).toFixed(2),
+                  volume: globalQuote['06. volume'],
+                  latestTradingDay: globalQuote['07. latest trading day'],
+                  previousClose: parseFloat(globalQuote['08. previous close'] ).toFixed(2),
+                  change: parseFloat(globalQuote['09. change']).toFixed(2),
+                  changePercent: globalQuote['10. change percent'],
                 });
               }
-              store.commit("updateResponseValues", [
+              store.commit('updateResponseValues', [
                 ...store.state.responseData,
                 this.data,
               ]);
@@ -83,17 +86,12 @@ export default {
       });
     },
     proceedItem() {
-      if (this.responseData && this.responseData.length != 0) {
-        router.push("/portfolio");
+      if (this.responseData && this.responseData.length !== 0) {
+        router.push('/portfolio');
       } else {
         this.showAlert = true;
       }
     },
-  },
-  mounted() {
-    setInterval(() => {
-      this.fetchMarketData();
-    }, 5000);
   },
   computed: {
     ...mapState({
