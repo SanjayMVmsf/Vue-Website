@@ -1,0 +1,9 @@
+{
+    "include": [
+      "./src/**/*" // include all files and directories inside src directory
+    ],
+    "exclude": [
+      "node_modules" // exclude node_modules directory
+    ]
+  }
+  
